@@ -382,7 +382,7 @@ sum2(1)
   
 ## Class, Object, Trait  
 ### Class  
-*   
+* 다음과 같이 User 클래스를 자바로 선언한다고 하자.  
 ```java  
 class User {  
 	private Integer id;  
@@ -394,35 +394,124 @@ class User {
 	public void sayHello() { System.out.println("hello"); }  
 }  
 ```  
+* 이를 Scala 버전으로 구현하면 다음과 같다.  
 ```scala  
 class User(id: Int, name: String) {  
 	def sayHello(): Unit = println("hello")  
 }  
+
+val user = new User(1, "name")
+user.id // ERROR
 ```  
-getter, setter  
+* 클래스의 내부 필드는 private이며 getter가 필요한 경우 필드 앞에 `val`을 추가한다. 
 ```scala  
 class User(val id: Int, val name: String)  
 ```  
-### Case class  
-```scala  
-case class User(id: Int, name: String)  
-```  
-exersize  
-```scala  
-// id : 1, name : "상품명"  
-def showItem(item: Item) = {  
-	println("")  
-}  
-  
-showItem()  
-```  
-### Object  
-```scala  
-  
-```  
+### Case class
+* class 보다 많이 쓰이는 것은 case class 이다.
+```scala
+case class User(id: Int, name: String)
+```
+* case class의 모든 필드는 기본적으로 접근 가능하며, new 없이 생성 가능하다. 
+또한 내용이 같은지를 비교하는 equals과 hashCode를 제공해주고 있어 다음과 같이 사용 가능하다.  
+```scala
+val user = User(1, "name")
+
+user.id // OK
+new User(1, "name") == new User(1, "name") // true
+``` 
+* **연습문제** : 다음 java 클래스를 case class로 변경해보자. [링크](https://scastie.scala-lang.org/)
+```java
+class Item { 
+    public Integer id;
+    public Brand brand;
+    
+    public Item(Integer id, Brand brand) {
+        this.id = id;
+        this.brand = brand;
+    }
+}
+
+class Brand {
+    public Integer id;
+    public BrandCategory brandCategory;
+
+    public Brand(Integer id, BrandCategory brandCategory) {
+        this.id = id;
+        this.brandCategory = brandCategory;
+    }
+}
+
+class BrandCategory {
+    public Integer id;
+    public String name;
+
+    public BrandCategory(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+}
+
+new Item(1, new Brand(1, new BrandCategory(1, "a")))
+``` 
+* case class가 가장 유용한 것은 match-case와 같이 쓰일 때이다.
+```scala
+case class User(id: Int, name: String)
+
+val user1 = User(1, "kim")
+val user2 = User(2, "lee")
+
+user1 match {
+	case User(1, _) => "find user 1"
+	case User(id, "lee") => "find user with name 'lee'" + id
+	case _ => "other" 
+}
+```
+* **연습문제** : 브랜드 아이디가 1인 경우에만 카테고리명을 출력하고, 그 외에는 empty를 출력하는 함수를 만들어보자.  [링크](https://scastie.scala-lang.org/karellen-kim/JW9EvSNbTCG68s2W5AFh8g)
+```scala
+val item1 = Some(Item(1, Brand(1, BrandCategory(3, "item1 category name"))))
+val item2 = Some(Item(2, Brand(2, BrandCategory(4, "item2 category name"))))
+
+def printOnlyBrand1Category(item: Option[Item]) = ???
+
+printOnlyBrand1Category(item1) // item1 category name
+printOnlyBrand1Category(item2) // empty
+printOnlyBrand1Category(None) // empty
+``` 
+### Object
+* object는 싱글톤 객체이다.  
+```scala
+object Item {
+  val ERROR_CODE = "500"
+}
+Item.ERROR_CODE
+```
+* 동일한 이름의 클래스가 있다면 companion 객체가 되어, 같은 이름의 companion 클래스에서는 object 클래스의 private 변수에 접근 가능하게 된다.  
+```scala
+object Item {
+  val ERROR_CODE = "500"
+  private val TYPE_1 = "TYPE_1"
+  private val TYPE_2 = "TYPE_2"
+}
+
+case class Item(id: Int, tpe: String) {
+  def getType(): Int = {
+    tpe match {
+      case Item.TYPE_1 => 1
+      case Item.TYPE_2 => 2
+    }
+  }
+}
+
+Item.ERROR_CODE
+//Item.TYPE_1 // ERROR
+```
+* companion 클래스를 어디에 사용할 수 있나?  
+Java 개발시 class 내부에 선언했던 static 변수들을 분리하여 같은 이름의 object 객체에 저장하는데 사용한다.  
+* companion 객체의 private 변수에 접근 가능한 이유는 무엇일까?  
+Object 객체는 컴파일 시점에 companion 클래스와 병합되게 된다. 따라서 실제로는 동일 클래스의 코드가 되므로 private 변수에 접근 가능한 것이 당연하게 된다.  
 ### Trait  
-Multiple inheritance support. It’s similar to Interface.   
-But it can contain a function implementation.  
+
 ```scala  
   
 ```  
