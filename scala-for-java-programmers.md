@@ -351,8 +351,6 @@ val inc = sum(1, _: Int)
 def sum(a: Int)(b: Int) = a + b  
 val inc = sum(1)  
 ```  
-### 부분 적용함수와 커링을 어디에 쓰나?  
-여러 활용 방안이 있겠지만, 다음의 경우를 생각해보자.  
 ### 정리  
 1. 함수 선언은 다음과 같이 한다. (return 생략 가능하다)  
 ```scala  
@@ -419,6 +417,9 @@ val user = User(1, "name")
 
 user.id // OK
 new User(1, "name") == new User(1, "name") // true
+
+val copied = user.copy()
+copied == user // true
 ``` 
 * **연습문제** : 다음 java 클래스를 case class로 변경해보자. [링크](https://scastie.scala-lang.org/)
 ```java
@@ -511,11 +512,66 @@ Java 개발시 class 내부에 선언했던 static 변수들을 분리하여 같
 * companion 객체의 private 변수에 접근 가능한 이유는 무엇일까?  
 Object 객체는 컴파일 시점에 companion 클래스와 병합되게 된다. 따라서 실제로는 동일 클래스의 코드가 되므로 private 변수에 접근 가능한 것이 당연하게 된다.  
 ### Trait  
-
+* Scala에도 abstract 키워드를 사용하여 추상 클래스를 선언할 수 있다.  
+그러나 더 많이 사용되는 것은 trait 이다.  
+trait은 interface와 비슷하나 일부 구현이 가능하다.  
 ```scala  
-  
+  trait Shape {
+  def w: Int
+  def h: Int
+  def show(): String = s"w=${w}, h=${h}" // 일부 구현 가능
+}
 ```  
-  
+* 왜 interface에서는 구현이 불가능하게 되어 있었는지 생각해보자.  
+Diamond problem이라 불리는 문제 때문이었는데  
+![](resources/scala-for-java-programmers/trait.png)
+* 이와 같은 경우 trait에서는 하나의 trait만 main trait만을 상속하고, 다른 trait는 mix-in함으로서 이 문제를 해결한다.  
+mix-in은 정확히는 상속하는 것이 아니라, 다른 코드를 포함한다는 의미에 가깝다.  
+**결과적으로 하나의 trait만 상속하게 되어 이러한 문제를 해결**하게 되는데,  
+따라서 여러 extends A, B, C 와 같이 표현하는 것이 아니라,   
+extend A with B with C 와 같이 표현하게 된다.  
+```scala
+trait A {
+  def func: String
+}
+
+trait A1 extends A {
+  override def func: String = "A1"
+}
+
+trait A2 extends A {
+  override def func: String = "A2"
+}
+
+class A1A2 extends A1 with A2
+class A2A1 extends A2 with A1
+
+val a1a2 = new A1A2
+val a2a1 = new A2A1
+
+a1a2.func // A2
+a2a1.func // A1
+```
+### 정리 
+1. class는 다음과 같이 정의한다  
+```scala
+class User(id: Int, name: String)
+```
+2. 보통은 case class를 많이 사용한다.   
+case class는 내용 비교가 가능하며, pattern matching에 유용하다.  
+```scala
+case class User(id: Int, name: String)
+
+new User(1, "name") == new User(1, "name") // true
+
+user match {
+	case User(id, "lee") => "find user with name 'lee'" + id
+	case _ => "other" 
+}
+```
+3. Object는 싱글톤 객체이며, 동일한 이름의 class를 companion으로 가질 수 있다.  
+4. Trait은 다중 상속을 가능하게 해주며, 자바의 interface와 달리 내부 구현이 가능하다. (정확히는 다중 상속처럼 보이게 해준다)  
+
 ## Standard library  
 ### Option  
 * Scala에서 null을 사용해도 오류가 나는 것은 아니지만, null을 사용해서는 **절대** 안된다.  
@@ -655,6 +711,25 @@ val tuple: (Int, String, Boolean, Int) = (1, "str", true, 5)
 val num: Int = tuple._1  
 val str: String = tuple._2  
 ```  
+* 튜플이 쓰이는 예를 보자.
+```scala
+val sorted: Seq[(Item, Int)] = items
+  .sortBy(_.price)
+  .zipWithIndex
+
+sorted.map {
+  data => {
+    val item = data._1
+    val index = data._2
+
+    (index, item.name)
+  }
+}
+```
+* 앞서 배웠던 partial function, pattern matching을 이용하여 더 나은 코드로 작성해보자.  
+```scala
+sorted.map { case (item, index) => (index, item.name) }
+```
 * 튜플은 값을 추가하거나, 다른 튜플과 병합하거나 할 수 없다.  
 왜 일까? 튜플과 같이 각각의 타입을 유지하는 목록을 자바로 구현한다고 생각해보자.  
 ```java  
@@ -673,11 +748,39 @@ new Tuple<Int, String, Boolean>(1, "str", true)
 case class Tuple3[+T1, +T2, +T3](_1: T1, _2: T2, _3: T3)  
 ```  
 ![tupleN](resources/scala-for-java-programmers/tuple_n.png)  
-### Map  
+* 참고 : [shapeless](https://www.scala-exercises.org/shapeless/polymorphic_function_values)  
+### Map 
+* Map은 다음과 같이 정의할 수 있다.  
 ```scala  
-  
+val map = Map((1, "a"), (2, "b"), (3, "c"))
 ```  
-  
+* 다음과 같이도 표현할 수 있다.  
+```scala
+val map = Map((1 -> "a"), (2 -> "b"), (3 -> "c"))
+```
+* 자주 사용하게될 기능을 살펴보자.
+```scala
+val map = Map((1, "a"), (2, "b"), (3, "c"))
+
+map.get(1) // Some("a")
+map.getOrElse(4, "not found") // "not found"
+map.contains(4) // false
+map.map { case (key, value) =>
+  s"키=${key}/값=${value}"
+} 
+// List(키=1/값=a, 키=2/값=b, 키=3/값=c)
+```
+* Map을 정의할때 요소들의 모양이 튜플과 비슷한데, 이건 실제로 Map이 튜플을 사용하기 때문이다.
+```scala
+abstract class GenMapFactory(...) {
+  def apply[A, B](elems : scala.Tuple2[A, B]*) = { ... }	
+}
+```
+* `->`표 기호 또한 실제로는 Tuple의 alias이다.
+```scala
+def ->[B](y : B) : scala.Tuple2[A, B] = { ... }
+```
+
 ## Monad  
 * Option  
 ```scala  
