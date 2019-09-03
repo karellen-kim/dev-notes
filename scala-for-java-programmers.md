@@ -524,7 +524,7 @@ trait은 interface와 비슷하나 일부 구현이 가능하다.
 ```  
 * 왜 interface에서는 구현이 불가능하게 되어 있었는지 생각해보자.  
 Diamond problem이라 불리는 문제 때문이었는데  
-![](resources/scala-for-java-programmers/trait.png)
+![](resources/scala-for-java-programmers/diamond-problem.png)
 * 이와 같은 경우 trait에서는 하나의 trait만 main trait만을 상속하고, 다른 trait는 mix-in함으로서 이 문제를 해결한다.  
 mix-in은 정확히는 상속하는 것이 아니라, 다른 코드를 포함한다는 의미에 가깝다.  
 **결과적으로 하나의 trait만 상속하게 되어 이러한 문제를 해결**하게 되는데,  
