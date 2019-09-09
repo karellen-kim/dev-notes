@@ -781,8 +781,22 @@ abstract class GenMapFactory(...) {
 def ->[B](y : B) : scala.Tuple2[A, B] = { ... }
 ```
 
-## Monad  
+## Monad 
+* 함수형 프로그래밍에서 자주 언급되는 모나드에 관해 알아보자.  
+과연 모나드란 무엇일까? 
 * Option  
+* Option의 예를 살펴보자.  
+어떤 Option값이 주어졌을때, 물론 매번 해당 값이 존재하는지 확인하여 (isDefined) 계산할 수 있으나,   
+```scala
+val num: Option[Int] = Some(1)
+
+if (num.isDefined) { // 이렇게도 할수 있지만
+  Some(num.get * 2)
+} else {
+  None
+}
+```
+이 값이 있는지 없는지 확인하는 일은 우리의 관심사가 아니다.  
 ```scala  
 val num: Option[Int] = Some(1)  
 num.map(n => n * 2)  
