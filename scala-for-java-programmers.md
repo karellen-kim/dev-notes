@@ -784,9 +784,8 @@ def ->[B](y : B) : scala.Tuple2[A, B] = { ... }
 ## Monad 
 * 함수형 프로그래밍에서 자주 언급되는 모나드에 관해 알아보자.  
 과연 모나드란 무엇일까? 
-* Option  
-* Option의 예를 살펴보자.  
-어떤 Option값이 주어졌을때, 물론 매번 해당 값이 존재하는지 확인하여 (isDefined) 계산할 수 있으나,   
+* Option의 예를 살펴보자.
+어떤 Option값이 주어졌을때, 물론 매번 해당 값이 존재하는지 확인하여 (isDefined) 계산할 수 있으나,
 ```scala
 val num: Option[Int] = Some(1)
 
@@ -796,27 +795,30 @@ if (num.isDefined) { // 이렇게도 할수 있지만
   None
 }
 ```
-이 값이 있는지 없는지 확인하는 일은 우리의 관심사가 아니다.  
+* 이 값이 있는지 없는지 확인하는 일은 우리의 관심사가 아니다. 우리에 관심사에만 주목해보자.
 ```scala  
 val num: Option[Int] = Some(1)  
 num.map(n => n * 2)  
 ```  
-* List  
+* List도 마찬가지다.
+목록을 순회하는 것은 우리의 주 목적이 아니다. 우리의 관심사만 구현해보자.  
 ```scala  
 val num: List[Int] = List(1,2,3)  
 num.map(n => n * 2)  
 ```  
-* Future  
+* Future라고 다르지 않다.
+결과값을 기다리던, 기다리다 실패하던 그건 우리의 주 목적이 아니다. 값이 오는 경우 – 우리가 구현해야 하는 그 목적에만 주목해보자.  
 ```scala  
 val num: Future[Int] = Future.successful(1)  
 num.map(n => n * 2)  
 ```  
-* F라는 타입이 있다고 하자. 내부의 값 Int에 접근하려면 어떻게 해야 하나?  
+* 여기서 문제.
+F라는 타입이 있다고 하자. 그 것이 List인지 Future인지, Option인지는 아무도 모른다. 내부의 값 Int에 *2를 하려면 어떻게 해야 할까?
 ```scala  
 val num: F[Int] = ???  
 num.map(n => n * 2)  
 ```  
-* 이와 같은 것이 Monad라고 생각하면 된다  
+* F가 List이든 Future이든 Option 상관없다. 우리의 관심사에만 집중하면 된다. 이와 같은 것이 Monad라고 생각하면 된다.
 * **연습문제** : 다음과 같은 경우가 있다고 하자. Int 값에 2를 곱하고 싶다면 어떻게 해야 하나? [링크](https://scastie.scala-lang.org/karellen-kim/DC0d6vXKQjGM47dOJOqg2Q)  
 ```scala  
 import scala.concurrent.Future  
