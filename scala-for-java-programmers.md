@@ -26,7 +26,7 @@ var num1 = 1
 > Compile time에 오류를 발견할 수 있다.  
 > IDE의 도움을 받을수 있다.  
   
-![](resources/scala-for-java-programmers/dynamic-static.png){:height="50%" width="50%"}  
+<img src="resources/scala-for-java-programmers/dynamic-static.png" width="400"/>
   
 * 그래서 아래와 같이 dynamic type 언어처럼 선언하되, 타입 생략이 가능하다.  
 ```scala  
